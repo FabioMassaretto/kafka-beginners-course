@@ -9,7 +9,11 @@
         <module name="kafkabasics" />
         <module name="kafkaconsumerelasticsearch" />
         <module name="kafkaproducertwitter" />
+        <module name="kafka-streams-filter-tweets" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="kafka-connector" target="8" />
+    </bytecodeTargetLevel>
   </component>
 </project>

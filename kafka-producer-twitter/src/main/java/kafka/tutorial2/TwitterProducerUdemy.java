@@ -29,7 +29,7 @@ public class TwitterProducerUdemy {
     private String token = "1021179954-S0EdhlZZcaRVIZ3u6AjCRmk3XuqOlKfIaFzYeH3";
     private String secret = "N5kdxnJj9L0tYk9U2VXrc1wiQXvJiCjM2gjCyPVqOIdYl";
 
-    List<String> terms = Lists.newArrayList("bitcoin", "USA", "Palmeiras");
+    List<String> terms = Lists.newArrayList("bitcoin", "USA", "Palmeiras", "Politics");
 
 
     public TwitterProducerUdemy() {

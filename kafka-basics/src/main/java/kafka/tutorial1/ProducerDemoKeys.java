@@ -28,8 +28,8 @@ public class ProducerDemoKeys {
             // create producer record
 
             String topic = firstTopic;
-            String value = "Hello world > " + Integer.toString(i);
             String key = "id_" + Integer.toString(i);
+            String value = "Hello world > " + Integer.toString(i);
 
             // tips: providing key we guarantee that the data always goes to the same partition
             // every time we run the application

@@ -12,12 +12,11 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.serialization.StringDeserializer;
+import org.elasticsearch.action.bulk.BulkRequest;
+import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
-import org.elasticsearch.client.RequestOptions;
-import org.elasticsearch.client.RestClient;
-import org.elasticsearch.client.RestClientBuilder;
-import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.client.*;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,26 +38,40 @@ public class ElasticSearchConsumer {
         while (true) {
             ConsumerRecords<String, String> records =  consumer.poll(Duration.ofMillis(100));
 
+            Integer recordCount = records.count();
+
+            logger.info("Received: " + recordCount + " records.");
+
+            BulkRequest bulkRequest = new BulkRequest();
             for (ConsumerRecord<String, String> record : records) {
                 // 2 strategies
                 // kafka generic ID:
                 //String id = record.topic() + "_" + record.partition() + "_" + record.offset();
 
                 // twitter feed specific id
-                String id = extractIdFromTweet(record.value());
+                try{
+                    String id = extractIdFromTweet(record.value());
 
-                // where we insert data into elasticsearch
-                String jsonString = record.value();
+                    // where we insert data into elasticsearch
+                    String jsonString = record.value();
 
-                IndexRequest indexRequest = new IndexRequest(
-                        "twitter",
-                        "tweets",
-                        id // this is to make our consumer idempotent
-                ).source(jsonString, XContentType.JSON);
+                    IndexRequest indexRequest = new IndexRequest(
+                            "twitter",
+                            "tweets",
+                            id // this is to make our consumer idempotent
+                    ).source(jsonString, XContentType.JSON);
 
-                IndexResponse indexResponse = client.index(indexRequest, RequestOptions.DEFAULT);
+                    bulkRequest.add(indexRequest); // we add to our bulk request (takes no time)
+                } catch (NullPointerException e) {
+                    logger.warn("Skiping bad data: ", record.value());
+                }
+            }
 
-                logger.info(indexResponse.getId());
+            if (recordCount > 0) {
+                BulkResponse bulkResponse = client.bulk(bulkRequest, RequestOptions.DEFAULT);
+                logger.info("Committing offsets...");
+                consumer.commitSync();
+                logger.info("Offsets have been committed");
 
                 try {
                     Thread.sleep(1000);
@@ -110,6 +123,8 @@ public class ElasticSearchConsumer {
         prop.setProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         prop.setProperty(ConsumerConfig.GROUP_ID_CONFIG, groupId);
         prop.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+        prop.setProperty(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false");
+        prop.setProperty(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, "100");
 
         // create a consumer
         KafkaConsumer<String, String> consumer = new KafkaConsumer<String, String>(prop);
