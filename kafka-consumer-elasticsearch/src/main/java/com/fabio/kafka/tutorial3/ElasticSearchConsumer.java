@@ -92,9 +92,9 @@ public class ElasticSearchConsumer {
     }
 
     public static RestHighLevelClient createClient(){
-        String hostname = "kafka-cluster-8593964310.ap-southeast-2.bonsaisearch.net";
-        String username = "5yrom48vi3";
-        String password = "1khr6jywch";
+        String hostname = ".ap-southeast-2.bonsaisearch.net";
+        String username = "";
+        String password = "";
 
         // do not do if you run local ES
         final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();

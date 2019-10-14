@@ -39,10 +39,10 @@ public class TwitterProducer {
         hosebirdEndpoint.trackTerms(terms);
 
         // These secrets should be read from a config file
-        Authentication hosebirdAuth = new OAuth1("s7dto2dMnTHSrc9DRHRwvcUJE",
-                "E8KsfnKrMtDICB3GzVCUijPS6EYTU8afaM48kIKhnFCV61MSd7",
-                "1021179954-S0EdhlZZcaRVIZ3u6AjCRmk3XuqOlKfIaFzYeH3",
-                "N5kdxnJj9L0tYk9U2VXrc1wiQXvJiCjM2gjCyPVqOIdYl");
+        Authentication hosebirdAuth = new OAuth1(consumerKey,
+                consumerSecret,
+                token,
+                tokenSecret);
 
         ClientBuilder builder = new ClientBuilder()
                 .name("Hosebird-Client-01")                              // optional: mainly for the logs
